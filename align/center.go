@@ -29,6 +29,10 @@ func GetTerminalWidth() int {
 
 func Center(input, banner string) {
 	template := art.GenerateTemplate(banner)
+	
+	if len(template) == 0 {
+		return
+	}
 
 	if input == "" {
 		os.Exit(0)

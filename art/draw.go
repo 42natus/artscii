@@ -8,6 +8,10 @@ import (
 
 func Draw(input, banner string) {
 	template := GenerateTemplate(banner)
+	
+	if len(template) == 0 {
+		return
+	}
 
 	if input == "" {
 		os.Exit(0)

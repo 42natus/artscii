@@ -29,7 +29,7 @@ func GetTerminalWidth() int {
 
 func Center(input, banner string) {
 	template := art.GenerateTemplate(banner)
-	
+
 	if len(template) == 0 {
 		return
 	}
@@ -46,7 +46,6 @@ func Center(input, banner string) {
 
 	userInput := strings.SplitSeq(input, "\\n")
 	terminalWidth := GetTerminalWidth()
-	// to center text, half the terminal width and the length of the text and sum the halves
 
 	for word := range userInput {
 		if word != "" {
@@ -59,14 +58,15 @@ func Center(input, banner string) {
 			}
 			// Print ASCII art row by row
 			for row := range 8 {
-				line := ""
+				var line strings.Builder
 				for _, char := range word {
 					// Map char to banner lines
 					indexCalc := (int(char)-32)*9 + 1 + row
-					line += template[indexCalc]
+					line.WriteString(template[indexCalc])
 				}
-				width := (terminalWidth + len(line))/2
-				fmt.Printf("%*v\n", width, line)
+				// to center, halve the sum of the terminal width and string length
+				width := (terminalWidth + len(line.String())) / 2
+				fmt.Printf("%*v\n", width, line.String())
 			}
 		} else {
 			fmt.Println()

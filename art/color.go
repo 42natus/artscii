@@ -47,7 +47,12 @@ func Color(input, substr, color, banner string) string {
 
 		n := len(word)
 		r := []rune(word)
+		
 		template := GenerateTemplate(banner)
+		if template == nil {
+			return result.String()
+		}
+
 		drawn := make([][]string, n)
 
 		// get locations of substr matches in input

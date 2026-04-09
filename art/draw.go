@@ -20,7 +20,12 @@ func Draw(input, banner string) string {
 		}
 		n := len(word)
 		r := []rune(word)
+		
 		template := GenerateTemplate(banner)
+		if template == nil {
+			return result.String()
+		}
+
 		drawn := make([][]string, n)
 
 		for i, ch := range r {

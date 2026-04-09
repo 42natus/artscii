@@ -54,7 +54,6 @@ func main() {
 	flag.Parse()
 
 	args := flag.Args()
-	fmt.Println(args)
 	var input, substr, banner string
 
 	switch len(args) {
@@ -68,7 +67,6 @@ func main() {
 		banner = args[1]
 	case 3:
 		if options.color == "default" && options.output != "nil" {
-			// fmt.Println("s")
 			fmt.Println(OutputUsageMsg)
 			return
 		} else if options.color == "default" && options.align != "default" {

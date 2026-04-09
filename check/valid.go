@@ -5,23 +5,27 @@ import (
 	"strings"
 )
 
-func HasValidColorOption(args []string) int {
-	re := regexp.MustCompile(`--color=[a-zA-Z]+`)
+var ColorRe = regexp.MustCompile(`--color=[a-zA-Z]+`)
+var OutputRe = regexp.MustCompile(`--output=[a-zA-Z]+.txt`)
+var AlignRe = regexp.MustCompile(`--align=[a-zA-Z]+`)
 
+func HasValidColorOption(args []string) int {
 	for _, arg := range args {
-		if strings.HasPrefix(arg, "--") && !re.MatchString(arg) {
-			return -1
+		if strings.HasPrefix(arg, "--") && !ColorRe.MatchString(arg) {
+			if !OutputRe.MatchString(arg) && !AlignRe.MatchString(arg) {
+				return -1
+			}
 		}
 	}
 	return 1
 }
 
 func HasValidOutputOption(args []string) int {
-	re := regexp.MustCompile(`--output=[a-zA-Z]+.txt`)
-
 	for _, arg := range args {
-		if strings.HasPrefix(arg, "--") && !re.MatchString(arg) {
-			return -1
+		if strings.HasPrefix(arg, "--") && !OutputRe.MatchString(arg) {
+			if !ColorRe.MatchString(arg) && !AlignRe.MatchString(arg) {
+				return -1
+			}
 		}
 	}
 	return 1
@@ -29,11 +33,11 @@ func HasValidOutputOption(args []string) int {
 
 func HasValidAlignOption(args []string) int {
 	// re := regexp.MustCompile(`--align=^(center|left|right|justify)$`)
-	re := regexp.MustCompile(`--align=[a-zA-Z]+`)
-
 	for _, arg := range args {
-		if strings.HasPrefix(arg, "--") && !re.MatchString(arg) {
-			return -1
+		if strings.HasPrefix(arg, "--") && !AlignRe.MatchString(arg) {
+			if !ColorRe.MatchString(arg) && !OutputRe.MatchString(arg) {
+				return -1
+			}
 		}
 	}
 	return 1

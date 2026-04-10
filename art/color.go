@@ -39,6 +39,11 @@ func Color(input, substr, color, banner string) string {
 		return result.String()
 	}
 
+	template := GenerateTemplate(banner)
+	if template == nil {
+		return result.String()
+	}
+
 	for word := range strings.SplitSeq(input, "\\n") {
 		if word == "" {
 			result.WriteRune('\n')
@@ -47,11 +52,6 @@ func Color(input, substr, color, banner string) string {
 
 		n := len(word)
 		r := []rune(word)
-		
-		template := GenerateTemplate(banner)
-		if template == nil {
-			return result.String()
-		}
 
 		drawn := make([][]string, n)
 
@@ -96,7 +96,6 @@ func Color(input, substr, color, banner string) string {
 			}
 			result.WriteRune('\n')
 		}
-		template = template[:0] // reset cached template
 	}
 
 	return result.String()

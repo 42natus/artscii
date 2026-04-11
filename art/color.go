@@ -56,7 +56,7 @@ func Color(input, substr, color, banner string) string {
 		drawn := make([][]string, n)
 
 		// get locations of substr matches in input
-		re := regexp.MustCompile(substr)
+		re := regexp.MustCompile(regexp.QuoteMeta(substr))
 		matches := re.FindAllStringIndex(word, -1)
 
 		var colorFlag bool

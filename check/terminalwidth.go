@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func GetTerminalWidth() int {
+func TerminalWidth() int {
 	cmd := exec.Command("sh", "-c", "tput cols 2>/dev/tty")
 	cols, err := cmd.Output()
 	if err != nil {

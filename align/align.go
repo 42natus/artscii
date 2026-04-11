@@ -20,16 +20,16 @@ func Center(input, banner string) {
 		return
 	}
 
-	terminalWidth := check.GetTerminalWidth()
+	terminalWidth := check.TerminalWidth()
 
 	for word := range strings.SplitSeq(input, "\\n") {
 		if word == "" {
 			fmt.Println()
 			continue
 		}
+
 		n := len(word)
 		r := []rune(word)
-
 		drawn := make([][]string, n)
 
 		for i, ch := range r {
@@ -61,16 +61,16 @@ func Right(input, banner string) {
 		return
 	}
 
-	terminalWidth := check.GetTerminalWidth()
+	terminalWidth := check.TerminalWidth()
 
 	for word := range strings.SplitSeq(input, "\\n") {
 		if word == "" {
 			fmt.Println()
 			continue
 		}
+
 		n := len(word)
 		r := []rune(word)
-
 		drawn := make([][]string, n)
 
 		for i, ch := range r {
@@ -101,16 +101,16 @@ func Justify(input, banner string) {
 		return
 	}
 
-	terminalWidth := GetTerminalWidth()
+	terminalWidth := TerminalWidth()
 
 	for word := range strings.SplitSeq(input, "\\n") {
 		if word == "" {
 			fmt.Println()
 			continue
 		}
+
 		n := len(word)
 		r := []rune(word)
-
 		drawn := make([][]string, n)
 
 		for i, ch := range r {

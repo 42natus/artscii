@@ -1,10 +1,24 @@
 package art
 
-import (
-	"strings"
-)
+func Draw(input, banner string) Word {
+	template := GenerateTemplate(banner)
+	if template == nil {
+		return nil
+	}
 
-func Draw(input, banner string) string {
+	r := []rune(input)
+	word := make(Word, len(r))
+
+	for i, ch := range input {
+		start := (ch-' ')*9 + 1
+		word[i] = template[start : start+8]
+	}
+
+	return word
+}
+
+/*
+func Draw0(input, banner string) string {
 	var result strings.Builder
 
 	if strings.ReplaceAll(input, "\\n", "") == "" { // handle input with just '\n's
@@ -44,3 +58,4 @@ func Draw(input, banner string) string {
 
 	return result.String()
 }
+*/

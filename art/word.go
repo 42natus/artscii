@@ -26,4 +26,19 @@ func (w Word) Lines() []string {
 	return lines
 }
 
-// func (w Word) Width() int { ... }        // visual width, ignoring ANSI codes
+// func stripANSI(line string) string {
+
+// }
+
+func (w Word) Width() int {
+	if len(w) == 0 {
+		return 0
+	}
+
+	// sum the visual width of each character's first line, stripping ANSI codes
+	total := 0
+	for _, char := range w {
+		total += len(stripANSI(char[0]))
+	}
+	return total
+}

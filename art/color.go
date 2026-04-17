@@ -47,6 +47,7 @@ func coloredIndices(line, substr string) map[int]bool {
 }
 
 func Color(words []Word, lines []string, substr, color string) []Word {
+	substr = strings.ReplaceAll(substr, "\\n", "")
 	colorCode := COLORS[strings.ToLower(color)]
 	result := make([]Word, len(words))
 
@@ -56,7 +57,7 @@ func Color(words []Word, lines []string, substr, color string) []Word {
 			continue
 		}
 
-		colored := coloredIndices(substr, lines[i])
+		colored := coloredIndices(lines[i], substr)
 		newWord := make(Word, len(word))
 
 		for j, char := range word {
@@ -76,84 +77,3 @@ func Color(words []Word, lines []string, substr, color string) []Word {
 
 	return result
 }
-
-/*
-func Color0(input, substr, color, banner string) string {
-	var result strings.Builder
-
-	if strings.ReplaceAll(input, "\\n", "") == "" { // handle input with just '\n's
-		count := len(input) / 2
-		result.WriteString(strings.Repeat("\n", count))
-		return result.String()
-	}
-
-	template := GenerateTemplate(banner)
-	if template == nil {
-		return result.String()
-	}
-
-	for word := range strings.SplitSeq(input, "\\n") {
-		if word == "" {
-			result.WriteRune('\n')
-			continue
-		}
-
-		n := len(word)
-		r := []rune(word)
-		drawn := make([][]string, n)
-
-		// ignore "\n" in substring to color
-		var pattern string
-		if strings.Contains(substr, "\\n") {
-			pattern = strings.ReplaceAll(substr, "\\n", "")
-		}
-
-		// get locations of substr matches in input
-		re := regexp.MustCompile(regexp.QuoteMeta(pattern))
-		matches := re.FindAllStringIndex(word, -1)
-		fmt.Println(matches)
-
-		var colorFlag bool
-		var stopColor int
-		for i, ch := range r {
-			start := (ch-' ')*9 + 1
-			uncolored := template[start : start+8]
-			colored := []string{}
-
-			if len(matches) > 0 && i == matches[0][0] {
-				colorFlag = true
-				stopColor = i + len(substr)
-				matches = matches[1:] // remove matches one-by-one after coloring them
-			}
-
-			// color whole substring match
-			if colorFlag && i < stopColor {
-				for _, line := range uncolored {
-					colored = append(colored, COLORS[strings.ToLower(color)]+line+Reset)
-				}
-			}
-
-			// done coloring substring match
-			if colorFlag && i == stopColor {
-				colorFlag = false
-			}
-
-			if len(colored) > 0 {
-				drawn[i] = colored
-			} else {
-				drawn[i] = uncolored
-			}
-		}
-
-		// build final string
-		for i := range 8 {
-			for j := range len(drawn) {
-				result.WriteString(drawn[j][i])
-			}
-			result.WriteRune('\n')
-		}
-	}
-
-	return result.String()
-}
-*/

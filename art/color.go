@@ -30,7 +30,55 @@ var COLORS = map[string]string{
 
 const Reset = "\033[0m"
 
-func Color(input, substr, color, banner string) string {
+func coloredIndices(line, substr string) map[int]bool {
+	colored := make(map[int]bool)
+	if substr == "" {
+		return colored
+	}
+
+	re := regexp.MustCompile(regexp.QuoteMeta(substr))
+	for _, match := range re.FindAllStringIndex(line, -1) {
+		for i := match[0]; i < match[1]; i++ {
+			colored[i] = true
+		}
+	}
+
+	return colored
+}
+
+func Color(words []Word, lines []string, substr, color string) []Word {
+	colorCode := COLORS[strings.ToLower(color)]
+	result := make([]Word, len(words))
+
+	for i, word := range words {
+		if len(word) == 0 {
+			result[i] = word
+			continue
+		}
+
+		colored := coloredIndices(substr, lines[i])
+		newWord := make(Word, len(word))
+
+		for j, char := range word {
+			if colored[j] {
+				lines := make([]string, 8)
+				for k, line := range char {
+					lines[k] = colorCode + line + Reset
+				}
+				newWord[j] = lines
+			} else {
+				newWord[j] = char
+			}
+		}
+
+		result[i] = newWord
+	}
+
+	return result
+}
+
+/*
+func Color0(input, substr, color, banner string) string {
 	var result strings.Builder
 
 	if strings.ReplaceAll(input, "\\n", "") == "" { // handle input with just '\n's
@@ -52,12 +100,18 @@ func Color(input, substr, color, banner string) string {
 
 		n := len(word)
 		r := []rune(word)
-
 		drawn := make([][]string, n)
 
+		// ignore "\n" in substring to color
+		var pattern string
+		if strings.Contains(substr, "\\n") {
+			pattern = strings.ReplaceAll(substr, "\\n", "")
+		}
+
 		// get locations of substr matches in input
-		re := regexp.MustCompile(regexp.QuoteMeta(substr))
+		re := regexp.MustCompile(regexp.QuoteMeta(pattern))
 		matches := re.FindAllStringIndex(word, -1)
+		fmt.Println(matches)
 
 		var colorFlag bool
 		var stopColor int
@@ -72,12 +126,14 @@ func Color(input, substr, color, banner string) string {
 				matches = matches[1:] // remove matches one-by-one after coloring them
 			}
 
+			// color whole substring match
 			if colorFlag && i < stopColor {
 				for _, line := range uncolored {
 					colored = append(colored, COLORS[strings.ToLower(color)]+line+Reset)
 				}
 			}
 
+			// done coloring substring match
 			if colorFlag && i == stopColor {
 				colorFlag = false
 			}
@@ -100,3 +156,4 @@ func Color(input, substr, color, banner string) string {
 
 	return result.String()
 }
+*/

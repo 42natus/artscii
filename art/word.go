@@ -1,6 +1,8 @@
 package art
 
-import "strings"
+import (
+	"strings"
+)
 
 // Word is a rendered ASCII-art word.
 // Word[i] is the i-th character; Word[i][j] is the j-th line of that character.
@@ -23,3 +25,5 @@ func (w Word) Lines() []string {
 	}
 	return lines
 }
+
+// func (w Word) Width() int { ... }        // visual width, ignoring ANSI codes

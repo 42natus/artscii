@@ -4,3 +4,7 @@
 2. figure out `align.Justify()`
 3. refactor `check/valid.go`
 4. order options around and observe output
+
+## post-Coffee and Claude
+
+1. fix '\n' issue

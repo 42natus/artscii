@@ -10,6 +10,13 @@ import (
 // define function type that takes a line and width then returns the padded string
 type AlignFunc func(line string, terminalWidth int) string
 
+var AlignFuncs = map[string]AlignFunc{
+    "center": centerLine,
+    "right":  rightLine,
+    "left":   leftLine,
+	// "justify": justifyLine,
+}
+
 func centerLine(line string, terminalWidth int) string {
 	width := (terminalWidth + len(line)) / 2
 	return fmt.Sprintf("%*s", width, line)

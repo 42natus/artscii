@@ -17,7 +17,7 @@ if err != nil {
 }
 */
 
-func Output(lines []string, fileName string) {
+func Output(words []Word, fileName string) {
 	file, err := os.Create(fileName)
 	if err != nil {
 		log.Fatal(err)

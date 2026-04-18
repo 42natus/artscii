@@ -5,48 +5,27 @@ import (
 	"strings"
 )
 
-var ColorRe = regexp.MustCompile(`--color=[a-zA-Z]+`)
-var OutputRe = regexp.MustCompile(`--output=[a-zA-Z]+.txt`)
-var AlignRe = regexp.MustCompile(`--align=[a-zA-Z]+`)
-
-func HasValidColorOption(args []string) int {
-	for _, arg := range args {
-		if strings.HasPrefix(arg, "--") && !ColorRe.MatchString(arg) {
-			if !OutputRe.MatchString(arg) && !AlignRe.MatchString(arg) {
-				return -1
-			}
-		}
-	}
-	return 1
+var validFlags = []*regexp.Regexp{
+	regexp.MustCompile(`^--color=[a-zA-Z]+$`),
+	regexp.MustCompile(`^--output=[a-zA-Z]+\.txt$`),
+	regexp.MustCompile(`^--align=(left|center|right|justify)$`),
 }
 
-func HasValidOutputOption(args []string) int {
+func HasInvalidFlags(args []string) bool {
 	for _, arg := range args {
-		if strings.HasPrefix(arg, "--") && !OutputRe.MatchString(arg) {
-			if !ColorRe.MatchString(arg) && !AlignRe.MatchString(arg) {
-				return -1
+		if !strings.HasPrefix(arg, "--") {
+			continue
+		}
+		recognised := false
+		for _, re := range validFlags {
+			if re.MatchString(arg) {
+				recognised = true
+				break
 			}
 		}
-	}
-	return 1
-}
-
-func HasValidAlignOption(args []string) int {
-	// re := regexp.MustCompile(`--align=^(center|left|right|justify)$`)
-	for _, arg := range args {
-		if strings.HasPrefix(arg, "--") && !AlignRe.MatchString(arg) {
-			if !ColorRe.MatchString(arg) && !OutputRe.MatchString(arg) {
-				return -1
-			}
+		if !recognised {
+			return true
 		}
 	}
-	return 1
-}
-
-func HasValidOptions(args []string) (color, output, align int) {
-	color = HasValidColorOption(args)
-	output = HasValidOutputOption(args)
-	align = HasValidAlignOption(args)
-
-	return color, output, align
+	return false
 }

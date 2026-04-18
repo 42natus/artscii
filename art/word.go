@@ -1,6 +1,7 @@
 package art
 
 import (
+	"regexp"
 	"strings"
 )
 
@@ -26,19 +27,20 @@ func (w Word) Lines() []string {
 	return lines
 }
 
-// func stripANSI(line string) string {
+var ansiRe = regexp.MustCompile(`\033\[[0-9;]*m`)
 
-// }
+func stripANSI(line string) string {
+	return ansiRe.ReplaceAllString(line, "")
+}
 
 func (w Word) Width() int {
 	if len(w) == 0 {
 		return 0
 	}
-
-	// sum the visual width of each character's first line, stripping ANSI codes
-	total := 0
+	// get the entire first line of the ASCII art word
+	var sb strings.Builder
 	for _, char := range w {
-		total += len(stripANSI(char[0]))
+		sb.WriteString(char[0])
 	}
-	return total
+	return len(stripANSI(sb.String()))
 }

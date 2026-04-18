@@ -7,8 +7,6 @@ import (
 	"strings"
 
 	"acad.learn2earn.ng/git/foloruns/ascii-art-justify/art"
-	"acad.learn2earn.ng/git/foloruns/ascii-art-justify/check"
-	"acad.learn2earn.ng/git/foloruns/ascii-art-justify/align"
 )
 
 type Options struct {
@@ -26,86 +24,65 @@ func main() {
 		return
 	}
 
-	// validate options, if present
-	validColor, validOutput, validAlign := check.HasValidOptions(os.Args[1:])
-
-	// if validColor == 
-	if validColor == -1 {
-		fmt.Println(ColorUsageMsg)
-		return
-	}
-
-	if validOutput == -1 {
-		fmt.Println(OutputUsageMsg)
-		return 
-	}
-
-	if validAlign == -1 {
-		fmt.Println(AlignUsageMsg)
-		return
-	}
-
 	var options Options
 
 	flag.StringVar(&options.color, "color", "default", "Color an optional substring in input")
-	flag.StringVar(&options.output, "output", "nil", "Send output to a .txt file")
+	flag.StringVar(&options.output, "output", "", "Send output to a .txt file")
 	flag.StringVar(&options.align, "align", "default", "Align output in terminal")
 
 	flag.Parse()
 
 	args := flag.Args()
-	var input, substr, banner string
-
-	switch len(args) {
-	case 1:
-		substr = args[0]
-		input = args[0]
-		banner = "standard"
-	case 2:
-		substr = args[0]
-		input = args[0]
-		banner = args[1]
-	case 3:
-		if options.color == "default" && options.output != "nil" {
-			fmt.Println(OutputUsageMsg)
-			return
-		} else if options.color == "default" && options.align != "default" {
-			fmt.Println(AlignUsageMsg)
-			return
-		}
-		substr = args[0]
-		input = args[1]
-		banner = args[2]
-	default:
+	if len(args) == 0 {
 		fmt.Println(CustomUsageMsg)
 		return
 	}
 
-	var output string
+	// extract positional arguments
+	var input, substr, banner string
+	banner = "standard"
 
 	if options.color != "default" {
-		output = art.Color(input, substr, options.color, banner)
+		if len(args) == 1 {
+			substr = ""
+			input = args[0]
+		} else {
+			substr = args[0]
+			input = args[1]
+			if len(args) == 3 {
+				banner = args[2]
+			}
+		}	
 	} else {
-		output = art.Draw(input, banner)
-	}
-
-	if options.output != "nil" {
-		art.Output(options.output, input, banner)
-	}
-
-	if options.align != "default" {
-		// art.Align(alignType, input, banner) --> is this cleaner?
-		switch strings.ToLower(options.align) {
-		case "center":
-			align.Center(input, banner)
-		case "right":
-			align.Right(input, banner)
-		case "justify":
-			align.Justify(input, banner)
-		default:
-			fmt.Print(art.Draw(input, banner))
+		input = args[0]
+		if len(args) == 2 {
+			banner = args[1]
 		}
-	} else {
-		fmt.Print(output)
+	}
+
+	// render ASCII art
+	lines := strings.Split(input, "\\n")
+	words := art.Draw(input, banner)
+
+	// output ASCII art to file
+	if options.output != "" {
+		art.Output(words, options.output)
+	}
+
+	// color ASCII art
+	if options.color != "default" {
+		words = art.Color(words, lines, substr, options.color)
+	}
+
+	// align ASCII art
+	if options.align != "default" {
+		alignment, ok := art.AlignFuncs[options.align]
+		if !ok {
+			fmt.Println("Unknown alignment")
+			return
+		}
+		result := art.Align(words, alignment)
+
+		fmt.Print(strings.Join(result, "\n"))
 	}
 }

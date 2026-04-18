@@ -84,5 +84,13 @@ func main() {
 		result := art.Align(words, alignment)
 
 		fmt.Print(strings.Join(result, "\n"))
+	} else {
+		for _, word := range words {
+			var final strings.Builder
+			for _, line := range word.Lines() {
+				final.WriteString(line + "\n")
+			}
+			fmt.Print(final.String())
+		}
 	}
 }

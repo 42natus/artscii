@@ -2,8 +2,9 @@
 
 1. make align work on color
 2. figure out `align.Justify()`
-4. order options around and observe output
+3. order options around and observe output
 
 ## post-Coffee and Claude
 
-1. fix '\n' issue
+1. fix `'\n'` issue
+2. cross-check position of checker for only `"\n"`s in input. (in `main.go`, lines 97 - 102)

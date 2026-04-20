@@ -34,9 +34,9 @@ func coloredIndices(line, substr string) map[int]bool {
 	colored := make(map[int]bool)
 	if substr == "" {
 		// color everything
-        for i := range len(line) {
-            colored[i] = true
-        }
+		for i := range len(line) {
+			colored[i] = true
+		}
 		return colored
 	}
 

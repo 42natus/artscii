@@ -19,6 +19,7 @@ func (w Word) Lines() []string {
 
 	for i := range 8 {
 		var line strings.Builder
+
 		for _, char := range w {
 			line.WriteString(char[i])
 		}

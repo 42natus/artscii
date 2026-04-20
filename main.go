@@ -88,13 +88,22 @@ func main() {
 		result := art.Align(words, alignment)
 
 		fmt.Print(strings.Join(result, "\n"))
-	} else {
-		for _, word := range words {
-			var final strings.Builder
-			for _, line := range word.Lines() {
-				final.WriteString(line + "\n")
-			}
+	}
+
+	// output words to terminal
+	for _, word := range words {
+		var final strings.Builder
+
+		if strings.ReplaceAll(input, "\\n", "") == "" { // handle input with just '\n's
+			count := len(input) / 2
+			final.WriteString(strings.Repeat("\n", count))
 			fmt.Print(final.String())
+			return
 		}
+		
+		for _, line := range word.Lines() {
+			final.WriteString(line + "\n")
+		}
+		// fmt.Print(final.String())
 	}
 }

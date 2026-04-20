@@ -17,22 +17,19 @@ if err != nil {
 }
 */
 
-func Output(words []Word, fileName string) {
+func Output(lines []string, fileName string) {
 	file, err := os.Create(fileName)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer file.Close()
 
-	for _, word :=  range words {
-		for _, line := range word.Lines() {
-			_, err = file.WriteString(line + "\n")
-			if err != nil {
-				log.Fatalf("Error writing file: %s", err)
-			}
+	for _, line :=  range lines {
+		_, err = file.WriteString(line + "\n")
+		if err != nil {
+			log.Fatalf("Error writing file: %s", err)
 		}
-	}
-	
+	}	
 	// output := []byte(line)
 	// error := os.WriteFile(fileName, output, 0644)
 	// if error != nil {

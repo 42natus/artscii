@@ -66,7 +66,11 @@ func main() {
 
 	// output ASCII art to file
 	if options.output != "" {
-		art.Output(words, options.output)
+		var allLines []string
+		for _, word := range words {
+			allLines = append(allLines, word.Lines()...)
+		}
+		art.Output(allLines, options.output)
 	}
 
 	// color ASCII art

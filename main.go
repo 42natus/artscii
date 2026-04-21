@@ -104,6 +104,6 @@ func main() {
 		for _, line := range word.Lines() {
 			final.WriteString(line + "\n")
 		}
-		// fmt.Print(final.String())
+		fmt.Print(final.String())
 	}
 }

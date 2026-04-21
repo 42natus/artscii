@@ -8,3 +8,5 @@
 
 1. fix `'\n'` issue
 2. cross-check position of checker for only `"\n"`s in input. (in `main.go`, lines 97 - 102)
+3. display proper usage message for each case of invalid option usage
+4. only output if filename follows <filename>.txt

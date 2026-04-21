@@ -91,19 +91,11 @@ func main() {
 	}
 
 	// output words to terminal
-	for _, word := range words {
-		var final strings.Builder
-
-		if strings.ReplaceAll(input, "\\n", "") == "" { // handle input with just '\n's
-			count := len(input) / 2
-			final.WriteString(strings.Repeat("\n", count))
-			fmt.Print(final.String())
-			return
-		}
-		
-		for _, line := range word.Lines() {
-			final.WriteString(line + "\n")
-		}
-		fmt.Print(final.String())
+	if strings.ReplaceAll(input, "\\n", "") == "" { // handle input with just '\n's
+		count := len(input) / 2
+		fmt.Print(strings.Repeat("\n", count))	
+	} else {
+		result := art.Display(words)
+		fmt.Println(strings.Join(result, "\n"))
 	}
 }

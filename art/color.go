@@ -30,73 +30,54 @@ var COLORS = map[string]string{
 
 const Reset = "\033[0m"
 
-func Color(input, substr, color, banner string) string {
-	var result strings.Builder
-
-	if strings.ReplaceAll(input, "\\n", "") == "" { // handle input with just '\n's
-		count := len(input) / 2
-		result.WriteString(strings.Repeat("\n", count))
-		return result.String()
+func coloredIndices(line, substr string) map[int]bool {
+	colored := make(map[int]bool)
+	if substr == "" {
+		// color everything
+		for i := range len(line) {
+			colored[i] = true
+		}
+		return colored
 	}
 
-	template := GenerateTemplate(banner)
-	if template == nil {
-		return result.String()
+	re := regexp.MustCompile(regexp.QuoteMeta(substr))
+	for _, match := range re.FindAllStringIndex(line, -1) {
+		for i := match[0]; i < match[1]; i++ {
+			colored[i] = true
+		}
 	}
 
-	for word := range strings.SplitSeq(input, "\\n") {
-		if word == "" {
-			result.WriteRune('\n')
+	return colored
+}
+
+func Color(words []Word, lines []string, substr, color string) []Word {
+	substr = strings.ReplaceAll(substr, "\\n", "")
+	colorCode := COLORS[strings.ToLower(color)]
+	result := make([]Word, len(words))
+
+	for i, word := range words {
+		if len(word) == 0 {
+			result[i] = word
 			continue
 		}
 
-		n := len(word)
-		r := []rune(word)
+		colored := coloredIndices(lines[i], substr)
+		newWord := make(Word, len(word))
 
-		drawn := make([][]string, n)
-
-		// get locations of substr matches in input
-		re := regexp.MustCompile(regexp.QuoteMeta(substr))
-		matches := re.FindAllStringIndex(word, -1)
-
-		var colorFlag bool
-		var stopColor int
-		for i, ch := range r {
-			start := (ch-' ')*9 + 1
-			uncolored := template[start : start+8]
-			colored := []string{}
-
-			if len(matches) > 0 && i == matches[0][0] {
-				colorFlag = true
-				stopColor = i + len(substr)
-				matches = matches[1:] // remove matches one-by-one after coloring them
-			}
-
-			if colorFlag && i < stopColor {
-				for _, line := range uncolored {
-					colored = append(colored, COLORS[strings.ToLower(color)]+line+Reset)
+		for j, char := range word {
+			if colored[j] {
+				lines := make([]string, 8)
+				for k, line := range char {
+					lines[k] = colorCode + line + Reset
 				}
-			}
-
-			if colorFlag && i == stopColor {
-				colorFlag = false
-			}
-
-			if len(colored) > 0 {
-				drawn[i] = colored
+				newWord[j] = lines
 			} else {
-				drawn[i] = uncolored
+				newWord[j] = char
 			}
 		}
 
-		// build final string
-		for i := range 8 {
-			for j := range len(drawn) {
-				result.WriteString(drawn[j][i])
-			}
-			result.WriteRune('\n')
-		}
+		result[i] = newWord
 	}
 
-	return result.String()
+	return result
 }

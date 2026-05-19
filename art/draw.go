@@ -13,17 +13,15 @@ func Draw(input, banner string) [][]Word {
 	var words [][]Word
 	
 	for field := range strings.SplitSeq(input, "\\n") {
-		if strings.Contains(field, " ") { // generate each whitespace-separated word
-			var line []Word
-			for subWord := range strings.SplitSeq(field, " ") {
-				line = append(line, render(subWord, template))
-				// line = append(line, render(" ", template))
+		var line []Word
+		inputWords := strings.Split(field, " ")
+		for i, w := range inputWords {
+			line = append(line, render(w, template))
+			if i < len(inputWords) - 1 {
+				line = append(line, render(" ", template))
 			}
-		} else {
-			var line []Word
-			line = append(line, render(field, template))
-			words = append(words, line)
 		}
+		words = append(words, line)
 	}
 
 	return words
@@ -34,7 +32,7 @@ func render(s string, template []string) Word {
 	r := []rune(s)
 	word := make(Word, len(r))
 
-	for i, ch := range s {
+	for i, ch := range r {
 		start := (ch-' ')*9 + 1
 		word[i] = template[start : start+8]
 	}

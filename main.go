@@ -26,7 +26,7 @@ func main() {
 
 	var options Options
 
-	flag.StringVar(&options.color, "color", "default", "Color an optional substring in input")
+	flag.StringVar(&options.color, "color", "", "Color an optional substring in input")
 	flag.StringVar(&options.output, "output", "", "Send output to a .txt file")
 	flag.StringVar(&options.align, "align", "default", "Align output in terminal")
 
@@ -39,10 +39,10 @@ func main() {
 	}
 
 	// extract positional arguments
-	var input, substr, banner string
-	banner = "standard"
+	var input, substr string
+	banner := "standard"
 
-	if options.color != "default" {
+	if options.color != "" { // active color flag
 		if len(args) == 1 {
 			substr = ""
 			input = args[0]
@@ -53,7 +53,7 @@ func main() {
 				banner = args[2]
 			}
 		}	
-	} else {
+	} else { // unused color flag
 		input = args[0]
 		if len(args) == 2 {
 			banner = args[1]
@@ -74,7 +74,7 @@ func main() {
 	}
 
 	// color ASCII art
-	if options.color != "default" {
+	if options.color != "" {
 		words = art.Color(words, lines, substr, options.color)
 	}
 

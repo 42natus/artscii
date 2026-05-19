@@ -30,10 +30,12 @@ func (w Word) Lines() []string {
 
 var ansiRe = regexp.MustCompile(`\033\[[0-9;]*m`)
 
+// Removes ANSI codes from the line
 func stripANSI(line string) string {
 	return ansiRe.ReplaceAllString(line, "")
 }
 
+// Width returns the length of an ASCII art line
 func (w Word) Width() int {
 	if len(w) == 0 {
 		return 0

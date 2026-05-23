@@ -7,15 +7,15 @@ import (
 	"strings"
 )
 
-// define function type that takes a line and width then returns the padded string
-type AlignFunc func(line string, terminalWidth int) string
+// // define function type that takes a line and width then returns the padded string
+// type AlignFunc func(line string, terminalWidth int) string
 
-var AlignFuncs = map[string]AlignFunc{
-    "center": centerLine,
-    "right":  rightLine,
-    "left":   leftLine,
-	// "justify": justifyLine,
-}
+// var AlignFuncs = map[string]AlignFunc{
+//     "center": centerLine,
+//     "right":  rightLine,
+//     "left":   leftLine,
+// 	// "justify": justifyLine,
+// }
 
 func centerLine(line string, terminalWidth int) string {
 	width := (terminalWidth + len(line)) / 2
@@ -30,11 +30,7 @@ func leftLine(line string, terminalWidth int) string {
 	return fmt.Sprintf("%*s", -terminalWidth, line)
 }
 
-func justifyLine0(line string, terminalWidth int) string {
-	return fmt.Sprintf("%*s", -terminalWidth, line)
-}
-
-func justifyLine(words []Word, terminalWidth int) string {
+func justifyLine(words []Word, terminalWidth int) []string {
 	var totalContentWidth, totalSpace, numGaps int
 	var content []Word
 
@@ -54,37 +50,34 @@ func justifyLine(words []Word, terminalWidth int) string {
 	baseGap := totalSpace / numGaps
 	remainder := totalSpace % numGaps
 
-	// problem: will print gap after final word on line too... reconsider whole approach
-	// Display(content)
+	// PROBABLE LOGICAL ERROR: will print gap after final word on line too... reconsider whole approach
 	var texts [][]string
+
 	for _, w := range content {
 		texts = append(texts, w.Lines())
 	}
+	
+	var justified = make([]string, 0, 8)
 
-	var final []string
-	for i, text := range texts {
-		extra := 0
-		if i < remainder {
-			extra = 1
+	for i := 0; i < len(texts); i++ {
+		for j := 0; j < len(texts); j++ {
+			justified[i] += texts[j][i] 
+			if j != 0 && i != len(texts) - 1 {
+				justified[i] += strings.Repeat(" ", baseGap)
+			// maybe one more condition for if i == len(texts) - 1 && len(texts) == 1??
+			} else {
+				justified[i] += strings.Repeat(" ", baseGap + remainder)
+			}
 		}
-		// this gap gets baseGap + extra spaces
-		gap := baseGap + extra
-
-		final[i] += text[i] + strings.Repeat(" ", gap)
-
 	}
+	return justified
 
-	// for i := range numGaps {
-	// 	extra := 0, guy
-	// 	if i < remainder {
-	// 		extra = 1
-	// 	}
-	// 	// this gap gets baseGap + extra spaces
-	// 	gap := baseGap + extra
-	// }
-	// The first remainder gaps each get one extra column.
+	// var result string
+	// for _, line := range justified {
+	// 	result += line + "\n"
+	// } 
 
-	return fmt.Sprintf("%*s", -terminalWidth, line)
+	// return result
 }
 
 func getTerminalWidth() int {
@@ -104,28 +97,30 @@ func getTerminalWidth() int {
 	return width
 }
 
-func Align(words []Word, alignment AlignFunc) []string {
+func Align(words []Word, alignment string) []string {
 	var result []string
 	terminalWidth := getTerminalWidth()
 	printable := Display(words)
 	
 	for _, line := range printable {
-		if alignment != justifyLine {
-			result = append(result, alignment(line, terminalWidth))
-		} else {
-			result = append(result, alignment(words, ))
+		switch alignment {
+		case "center":
+			result = append(result, centerLine(line, terminalWidth))
+		case "right":
+			result = append(result, rightLine(line, terminalWidth))
+		case "left":
+			result = append(result, leftLine(line, terminalWidth))
+		case "justify":
+			result = justifyLine(words, terminalWidth)
 		}
 	}
+	// for _, line := range printable {
+	// 	if alignment != "justify" {
+	// 		result = append(result, AlignFuncs[alignment](line, terminalWidth))
+	// 	} else {
+	// 		result = justifyLine(words, terminalWidth)
+	// 	}
+	// }
 
 	return result
 }
-
-
-/*
-1. For each `[]Word` line, separate content words from space words — content at even indices, spaces at odd indices
-2. Calculate `totalContentWidth` — sum of `word.Width()` for even-indexed words
-3. Calculate `totalSpace = terminalWidth - totalContentWidth`
-4. Calculate `numGaps = len(line) / 2` — number of space slots
-5. Distribute space using `baseGap` and `remainder`
-6. Build each output row by interleaving content lines with gap strings
-*/

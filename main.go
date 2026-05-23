@@ -61,33 +61,41 @@ func main() {
 	}
 
 	// render ASCII art
-	lines := strings.Split(input, "\\n")
+	inputLines := strings.Split(input, "\\n")
 	words := art.Draw(input, banner)
 
 	// output ASCII art to file
 	if options.output != "" {
 		var allLines []string
-		for _, word := range words {
-			allLines = append(allLines, word.Lines()...)
+		for _, line := range words {
+			for _, word := range line {
+				allLines = append(allLines, word.Lines()...)
+			}
+			art.Output(allLines, options.output)
 		}
-		art.Output(allLines, options.output)
 	}
 
 	// color ASCII art
 	if options.color != "" {
-		words = art.Color(words, lines, substr, options.color)
+		for i, line :=  range words {
+			words[i] = art.Color(line, inputLines, substr, options.color)
+		}
+		fmt.Println(words)
 	}
 
 	// align ASCII art
 	if options.align != "default" {
-		alignment, ok := art.AlignFuncs[options.align]
-		if !ok {
-			fmt.Println("Unknown alignment")
-			return
+		// alignment, ok := art.AlignFuncs[options.align]
+		// if !ok {
+		// 	fmt.Println("Unknown alignment")
+		// 	return
+		// }
+		var result []string
+		for _, line := range words {
+			result = art.Align(line, options.align)
+			fmt.Println(strings.Join(result, "\n"))
 		}
-		result := art.Align(words, alignment)
 
-		fmt.Print(strings.Join(result, "\n"))
 	}
 
 	// output words to terminal
@@ -95,7 +103,11 @@ func main() {
 		count := len(input) / 2
 		fmt.Print(strings.Repeat("\n", count))	
 	} else {
-		result := art.Display(words)
-		fmt.Println(strings.Join(result, "\n"))
+		if options.align == "default" {
+			for _, line := range words {
+				result := art.Display(line)
+				fmt.Println(strings.Join(result, "\n"))
+			}
+		}
 	}
 }

@@ -47,8 +47,13 @@ func justifyLine(words []Word, terminalWidth int) []string {
 
 	totalSpace = terminalWidth - totalContentWidth
 
-	baseGap := totalSpace / numGaps
-	remainder := totalSpace % numGaps
+	var baseGap, remainder int
+	if numGaps != 0 {
+		baseGap = totalSpace / numGaps
+		remainder = totalSpace % numGaps
+	} else {
+		baseGap = totalSpace
+	}
 
 	// PROBABLE LOGICAL ERROR: will print gap after final word on line too... reconsider whole approach
 	var texts [][]string
@@ -59,15 +64,20 @@ func justifyLine(words []Word, terminalWidth int) []string {
 	
 	var justified = make([]string, 0, 8)
 
-	for i := 0; i < len(texts); i++ {
+	for i := range 8 {
 		for j := 0; j < len(texts); j++ {
-			justified[i] += texts[j][i] 
+			var s strings.Builder
+			s.WriteString(texts[j][i])
+			// justified[i] += texts[j][i] 
 			if j != 0 && i != len(texts) - 1 {
-				justified[i] += strings.Repeat(" ", baseGap)
+				s.WriteString(strings.Repeat(" ", baseGap))
+				// justified[i] += strings.Repeat(" ", baseGap)
 			// maybe one more condition for if i == len(texts) - 1 && len(texts) == 1??
 			} else {
-				justified[i] += strings.Repeat(" ", baseGap + remainder)
+				s.WriteString(strings.Repeat(" ", baseGap + remainder))
+				// justified[i] += strings.Repeat(" ", baseGap + remainder)
 			}
+			justified = append(justified, s.String())
 		}
 	}
 	return justified
@@ -101,19 +111,26 @@ func Align(words []Word, alignment string) []string {
 	var result []string
 	terminalWidth := getTerminalWidth()
 	printable := Display(words)
-	
-	for _, line := range printable {
-		switch alignment {
-		case "center":
+
+	switch alignment {
+	case "center":
+		for _, line := range printable {
 			result = append(result, centerLine(line, terminalWidth))
-		case "right":
-			result = append(result, rightLine(line, terminalWidth))
-		case "left":
-			result = append(result, leftLine(line, terminalWidth))
-		case "justify":
-			result = justifyLine(words, terminalWidth)
 		}
+	case "right":
+		for _, line := range printable {
+			result = append(result, rightLine(line, terminalWidth))
+		}
+	case "left":
+		for _, line := range printable {
+			result = append(result, leftLine(line, terminalWidth))
+		}
+	case "justify":
+		result = justifyLine(words, terminalWidth)
 	}
+
+	return result
+
 	// for _, line := range printable {
 	// 	if alignment != "justify" {
 	// 		result = append(result, AlignFuncs[alignment](line, terminalWidth))
@@ -122,5 +139,4 @@ func Align(words []Word, alignment string) []string {
 	// 	}
 	// }
 
-	return result
 }

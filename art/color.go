@@ -1,6 +1,7 @@
 package art
 
 import (
+	"fmt"
 	"regexp"
 	"strings"
 )
@@ -30,18 +31,18 @@ var COLORS = map[string]string{
 
 const Reset = "\033[0m"
 
-func coloredIndices(line, substr string) map[int]bool {
+func coloredIndices(inputLine, substr string) map[int]bool {
 	colored := make(map[int]bool)
 	if substr == "" {
 		// color everything
-		for i := range len(line) {
+		for i := range len(inputLine) {
 			colored[i] = true
 		}
 		return colored
 	}
 
 	re := regexp.MustCompile(regexp.QuoteMeta(substr))
-	for _, match := range re.FindAllStringIndex(line, -1) {
+	for _, match := range re.FindAllStringIndex(inputLine, -1) {
 		for i := match[0]; i < match[1]; i++ {
 			colored[i] = true
 		}
@@ -50,31 +51,48 @@ func coloredIndices(line, substr string) map[int]bool {
 	return colored
 }
 
-func Color(words []Word, lines []string, substr, color string) []Word {
+func Color(line []Word, inputLines []string, substr, color string) []Word {
 	substr = strings.ReplaceAll(substr, "\\n", "")
 	colorCode := COLORS[strings.ToLower(color)]
-	result := make([]Word, len(words))
+	result := make([]Word, len(line))
 
-	for i, word := range words {
+	for i := range len(line) {
+		fmt.Printf("%v: %v\n", i, line[i])
+	}
+	fmt.Println()
+
+	fmt.Printf("len(line): %v\n", len(line))
+
+	for i, word := range line {
+		fmt.Printf("current i: %v\n", i)
 		if len(word) == 0 {
 			result[i] = word
 			continue
 		}
 
-		colored := coloredIndices(lines[i], substr)
+		// // since the line itself 
+		// cleanedInputLine := strings.ReplaceAll(inputLines[i], " ", "")
+		// colored := coloredIndices(cleanedInputLine, substr)
+		colored := coloredIndices(inputLines[i], substr)
+		fmt.Printf("inputLine: %v\n", inputLines)
 		newWord := make(Word, len(word))
 
+		fmt.Printf("colored map:%v\n", colored)
+		
 		for j, char := range word {
+			fmt.Printf("colored char?:%v\n", colored[j])
 			if colored[j] {
-				lines := make([]string, 8)
+				inputLines := make([]string, 8)
 				for k, line := range char {
-					lines[k] = colorCode + line + Reset
+					inputLines[k] = colorCode + line + Reset
 				}
-				newWord[j] = lines
+				newWord[j] = inputLines
 			} else {
 				newWord[j] = char
 			}
 		}
+
+		fmt.Printf("newWord: %v\n", newWord)
 
 		result[i] = newWord
 	}

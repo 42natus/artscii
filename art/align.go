@@ -24,10 +24,6 @@ func rightLine(line string, terminalWidth int) string {
 	return strings.Repeat(" ", spaces) + line
 }
 
-func leftLine(line string, terminalWidth int) string {
-	return line
-}
-
 func justifyLine(words []Word, terminalWidth int) []string {
 	var cleanWords []Word
 	var totalWordWidth int

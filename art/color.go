@@ -1,7 +1,6 @@
 package art
 
 import (
-	"fmt"
 	"regexp"
 	"strings"
 )
@@ -34,7 +33,6 @@ const Reset = "\033[0m"
 func coloredIndices(inputLine, substr string) map[int]bool {
 	colored := make(map[int]bool)
 	if substr == "" {
-		// color everything
 		for i := range len(inputLine) {
 			colored[i] = true
 		}
@@ -47,55 +45,34 @@ func coloredIndices(inputLine, substr string) map[int]bool {
 			colored[i] = true
 		}
 	}
-
 	return colored
 }
 
-func Color(line []Word, inputLines []string, substr, color string) []Word {
-	substr = strings.ReplaceAll(substr, "\\n", "")
-	colorCode := COLORS[strings.ToLower(color)]
-	result := make([]Word, len(line))
-
-	for i := range len(line) {
-		fmt.Printf("%v: %v\n", i, line[i])
+func Color(line []Word, currentInputLine string, substr, color string) []Word {
+	colorCode, exists := COLORS[strings.ToLower(color)]
+	if !exists {
+		colorCode = COLORS["default"]
 	}
-	fmt.Println()
 
-	fmt.Printf("len(line): %v\n", len(line))
+	coloredMap := coloredIndices(currentInputLine, substr)
+	result := make([]Word, len(line))
+	globalCharIdx := 0 // Tracks our exact underlying location inside currentInputLine
 
 	for i, word := range line {
-		fmt.Printf("current i: %v\n", i)
-		if len(word) == 0 {
-			result[i] = word
-			continue
-		}
-
-		// // since the line itself 
-		// cleanedInputLine := strings.ReplaceAll(inputLines[i], " ", "")
-		// colored := coloredIndices(cleanedInputLine, substr)
-		colored := coloredIndices(inputLines[i], substr)
-		fmt.Printf("inputLine: %v\n", inputLines)
 		newWord := make(Word, len(word))
-
-		fmt.Printf("colored map:%v\n", colored)
-		
-		for j, char := range word {
-			fmt.Printf("colored char?:%v\n", colored[j])
-			if colored[j] {
-				inputLines := make([]string, 8)
-				for k, line := range char {
-					inputLines[k] = colorCode + line + Reset
+		for j, charMatrix := range word {
+			if coloredMap[globalCharIdx] {
+				coloredChar := make([]string, 8)
+				for k, row := range charMatrix {
+					coloredChar[k] = colorCode + row + Reset
 				}
-				newWord[j] = inputLines
+				newWord[j] = coloredChar
 			} else {
-				newWord[j] = char
+				newWord[j] = charMatrix
 			}
+			globalCharIdx++
 		}
-
-		fmt.Printf("newWord: %v\n", newWord)
-
 		result[i] = newWord
 	}
-
 	return result
 }

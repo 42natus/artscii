@@ -13,9 +13,11 @@ type Options struct {
 	color, output, align string
 }
 
+/*
 const ColorUsageMsg = "Usage: go run . [OPTION] [STRING]\n\nEX: go run . --color=<color> <substring to be colored> \"something\""
 const OutputUsageMsg = "Usage: go run . [OPTION] [STRING] [BANNER]\n\nEX: go run . --output=<fileName.txt> something standard"
 const AlignUsageMsg = "Usage: go run . [OPTION] [STRING] [BANNER]\n\nExample: go run . --align=right something standard"
+*/
 const CustomUsageMsg = "Usage: go run . [OPTION] [STRING] [BANNER]"
 
 func main() {
@@ -25,11 +27,9 @@ func main() {
 	}
 
 	var options Options
-
 	flag.StringVar(&options.color, "color", "", "Color an optional substring in input")
 	flag.StringVar(&options.output, "output", "", "Send output to a .txt file")
 	flag.StringVar(&options.align, "align", "default", "Align output in terminal")
-
 	flag.Parse()
 
 	args := flag.Args()
@@ -38,11 +38,10 @@ func main() {
 		return
 	}
 
-	// extract positional arguments
 	var input, substr string
 	banner := "standard"
 
-	if options.color != "" { // active color flag
+	if options.color != "" {
 		if len(args) == 1 {
 			substr = ""
 			input = args[0]
@@ -52,62 +51,46 @@ func main() {
 			if len(args) == 3 {
 				banner = args[2]
 			}
-		}	
-	} else { // unused color flag
+		}
+	} else {
 		input = args[0]
 		if len(args) == 2 {
 			banner = args[1]
 		}
 	}
 
-	// render ASCII art
+	if strings.ReplaceAll(input, "\\n", "") == "" {
+		fmt.Print(strings.Repeat("\n", len(input)/2))
+		return
+	}
+
+	// 1. Generate text models
 	inputLines := strings.Split(input, "\\n")
-	words := art.Draw(input, banner)
+	wordsMatrix := art.Draw(input, banner)
 
-	// output ASCII art to file
-	if options.output != "" {
-		var allLines []string
-		for _, line := range words {
-			for _, word := range line {
-				allLines = append(allLines, word.Lines()...)
-			}
-			art.Output(allLines, options.output)
-		}
-	}
-
-	// color ASCII art
+	// 2. Modify text color models if flag matches
 	if options.color != "" {
-		for i, line :=  range words {
-			words[i] = art.Color(line, inputLines, substr, options.color)
+		for i, line := range wordsMatrix {
+			wordsMatrix[i] = art.Color(line, inputLines[i], substr, options.color)
 		}
-		fmt.Println(words)
 	}
 
-	// align ASCII art
-	if options.align != "default" {
-		// alignment, ok := art.AlignFuncs[options.align]
-		// if !ok {
-		// 	fmt.Println("Unknown alignment")
-		// 	return
-		// }
-		var result []string
-		for _, line := range words {
-			result = art.Align(line, options.align)
-			fmt.Println(strings.Join(result, "\n"))
+	// 3. Flatten structure to printing matrix
+	var outputRows []string
+	for _, line := range wordsMatrix {
+		var renderedLine []string
+		if options.align != "default" {
+			renderedLine = art.Align(line, options.align)
+		} else {
+			renderedLine = art.Display(line)
 		}
-
+		outputRows = append(outputRows, renderedLine...)
 	}
 
-	// output words to terminal
-	if strings.ReplaceAll(input, "\\n", "") == "" { // handle input with just '\n's
-		count := len(input) / 2
-		fmt.Print(strings.Repeat("\n", count))	
+	// 4. Send output rows to target destination
+	if options.output != "" {
+		art.Output(outputRows, options.output)
 	} else {
-		if options.align == "default" {
-			for _, line := range words {
-				result := art.Display(line)
-				fmt.Println(strings.Join(result, "\n"))
-			}
-		}
+		fmt.Println(strings.Join(outputRows, "\n"))
 	}
 }

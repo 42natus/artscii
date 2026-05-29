@@ -6,6 +6,101 @@ import (
 	"strings"
 )
 
+// extractContentWords is the helper function you proposed.
+// It loops through all characters across all elements, groups letters into 
+// actual content words, and uses space characters as boundaries.
+
+// func isSpaceWord(w Word) bool {
+// 	lines := w.Lines()
+// 	if len(lines) == 0 {
+// 		return true
+// 	}
+// 	// If the first row contains only empty spaces, this whole Word is a spacing element
+// 	return strings.TrimSpace(stripANSI(lines[0])) == ""
+// }
+
+func extractContentWords(words []Word) []Word {
+	var cleanWords []Word
+	var currentWord Word
+
+	for _, word := range words {
+		for _, charMatrix := range word {
+			// Check if this individual character is a space block.
+			// charMatrix is a []string of 8 rows representing a single character.
+			if len(charMatrix) > 0 && strings.TrimSpace(stripANSI(charMatrix[2])) == "" {
+				// We hit a space character! This is our word boundary.
+				// If we have been building a word, save it and reset.
+				if len(currentWord) > 0 {
+					cleanWords = append(cleanWords, currentWord)
+					currentWord = nil
+				}
+			} else {
+				// It's a visible letter! Add this character to our current word.
+				currentWord = append(currentWord, charMatrix)
+			}
+		}
+	}
+
+	// Don't forget to grab the very last word after the loop finishes
+	if len(currentWord) > 0 {
+		cleanWords = append(cleanWords, currentWord)
+	}
+
+	return cleanWords
+}
+
+func justifyLine(words []Word, terminalWidth int) []string {
+	// 1. Use your helper function to get a pristine slice of content words
+	cleanWords := extractContentWords(words)
+	println(len(cleanWords))
+
+	// Fallback: If there's 1 or 0 words, justification is mathematically impossible.
+	// We default to a standard left-aligned render.
+	if len(cleanWords) <= 1 {
+		return Display(words)
+	}
+
+	// 2. Calculate the combined horizontal width of all real words
+	totalWordWidth := 0
+	for _, w := range cleanWords {
+		totalWordWidth += w.Width()
+	}
+
+	// 3. Determine how many spaces we need to distribute across the gaps
+	totalSpacesNeeded := terminalWidth - totalWordWidth
+	numGaps := len(cleanWords) - 1
+
+	// If the text is wider than the terminal screen, fallback to default display
+	if totalSpacesNeeded <= 0 {
+		return Display(words)
+	}
+
+	baseGap := totalSpacesNeeded / numGaps
+	remainder := totalSpacesNeeded % numGaps
+
+	// 4. Reconstruct the 8 rows by stitching our clean words and new spaces
+	justifiedLines := make([]string, 8)
+	for row := 0; row < 8; row++ {
+		var sb strings.Builder
+		for i, w := range cleanWords {
+			wordLines := w.Lines()
+			sb.WriteString(wordLines[row])
+
+			// Inject the calculated terminal padding between words (but not after the last word)
+			if i < numGaps {
+				currentGap := baseGap
+				if i < remainder {
+					currentGap++ // Smoothly distribute leftover remainder spaces left-to-right
+				}
+				sb.WriteString(strings.Repeat(" ", currentGap))
+			}
+		}
+		justifiedLines[row] = sb.String()
+	}
+
+	return justifiedLines
+}
+
 func centerLine(line string, terminalWidth int) string {
 	plainText := stripANSI(line)
 	if len(plainText) >= terminalWidth {
@@ -24,60 +119,8 @@ func rightLine(line string, terminalWidth int) string {
 	return strings.Repeat(" ", spaces) + line
 }
 
-func justifyLine(words []Word, terminalWidth int) []string {
-	var cleanWords []Word
-	var totalWordWidth int
-
-	// 1. Filter out placeholder space words to find real content words
-	for _, w := range words {
-		if len(w) == 0 {
-			continue
-		}
-		// If a word's plain text conversion contains only spaces, skip it
-		if strings.TrimSpace(stripANSI(strings.Join(w.Lines(), ""))) == "" {
-			continue
-		}
-		cleanWords = append(cleanWords, w)
-		totalWordWidth += w.Width()
-	}
-
-	// Fallback: If there's 1 or 0 words, justification is impossible. Default to Left.
-	if len(cleanWords) <= 1 {
-		return Display(words)
-	}
-
-	// 2. Distribute the padding space mathematically
-	totalSpacesNeeded := terminalWidth - totalWordWidth
-	numGaps := len(cleanWords) - 1
-
-	if totalSpacesNeeded <= 0 {
-		return Display(words) // Content overflows screen boundary; default render
-	}
-
-	baseGap := totalSpacesNeeded / numGaps
-	remainder := totalSpacesNeeded % numGaps
-
-	// 3. Assemble the 8 horizontal rows matching the gaps
-	justifiedLines := make([]string, 8)
-	for row := 0; row < 8; row++ {
-		var sb strings.Builder
-		for i, w := range cleanWords {
-			wordLines := w.Lines()
-			sb.WriteString(wordLines[row])
-
-			// Add space padding after every word except the last one
-			if i < numGaps {
-				currentGap := baseGap
-				if i < remainder {
-					currentGap++ // Distribute remainders smoothly left-to-right
-				}
-				sb.WriteString(strings.Repeat(" ", currentGap))
-			}
-		}
-		justifiedLines[row] = sb.String()
-	}
-
-	return justifiedLines
+func leftLine(line string, terminalWidth int) string {
+	return line
 }
 
 func getTerminalWidth() int {
@@ -111,7 +154,7 @@ func Align(words []Word, alignment string) []string {
 		return result
 	case "justify":
 		return justifyLine(words, terminalWidth)
-	default: // "left"
+	default: // "left" / "default"
 		return Display(words)
 	}
 }

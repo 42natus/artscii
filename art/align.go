@@ -6,69 +6,61 @@ import (
 	"strings"
 )
 
-// extractContentWords is the helper function you proposed.
-// It loops through all characters across all elements, groups letters into 
-// actual content words, and uses space characters as boundaries.
+func isSpaceWord(lines []string) bool {
+	for _, line := range lines {
+		if strings.TrimSpace(stripANSI(line)) != "" {
+			return false
+		}
+	}
+	return true
+}
 
-// func isSpaceWord(w Word) bool {
-// 	lines := w.Lines()
-// 	if len(lines) == 0 {
-// 		return true
-// 	}
-// 	// If the first row contains only empty spaces, this whole Word is a spacing element
-// 	return strings.TrimSpace(stripANSI(lines[0])) == ""
-// }
-
+// isolate actual content words (i.e. not whitespace) from the words set
 func extractContentWords(words []Word) []Word {
-	var cleanWords []Word
+	var actualWords []Word
 	var currentWord Word
 
 	for _, word := range words {
+		// check if each character is a space block.
 		for _, charMatrix := range word {
-			// Check if this individual character is a space block.
-			// charMatrix is a []string of 8 rows representing a single character.
-			if len(charMatrix) > 0 && strings.TrimSpace(stripANSI(charMatrix[2])) == "" {
-				// We hit a space character! This is our word boundary.
-				// If we have been building a word, save it and reset.
+			if len(charMatrix) > 0 && isSpaceWord(charMatrix) { // space words act as word boundaries.
 				if len(currentWord) > 0 {
-					cleanWords = append(cleanWords, currentWord)
+					actualWords = append(actualWords, currentWord) // put "string" of char matrices in slice of actual words
 					currentWord = nil
 				}
 			} else {
-				// It's a visible letter! Add this character to our current word.
+				// current character is a letter. add it to the current word.
 				currentWord = append(currentWord, charMatrix)
 			}
 		}
 	}
 
-	// Don't forget to grab the very last word after the loop finishes
+	// grab the very last word after the loop ends
 	if len(currentWord) > 0 {
-		cleanWords = append(cleanWords, currentWord)
+		actualWords = append(actualWords, currentWord)
 	}
 
-	return cleanWords
+	return actualWords
 }
 
 func justifyLine(words []Word, terminalWidth int) []string {
-	// 1. Use your helper function to get a pristine slice of content words
-	cleanWords := extractContentWords(words)
-	println(len(cleanWords))
+	// get slice of actual content words
+	actualWords := extractContentWords(words)
 
-	// Fallback: If there's 1 or 0 words, justification is mathematically impossible.
-	// We default to a standard left-aligned render.
-	if len(cleanWords) <= 1 {
+	// default to left alignment if there's 0 or 1 word.
+	if len(actualWords) <= 1 {
 		return Display(words)
 	}
 
-	// 2. Calculate the combined horizontal width of all real words
+	// calculate the combined width of all real words
 	totalWordWidth := 0
-	for _, w := range cleanWords {
+	for _, w := range actualWords {
 		totalWordWidth += w.Width()
 	}
 
-	// 3. Determine how many spaces we need to distribute across the gaps
+	// determine how many spaces we need to distribute across the gaps
 	totalSpacesNeeded := terminalWidth - totalWordWidth
-	numGaps := len(cleanWords) - 1
+	numGaps := len(actualWords) - 1
 
 	// If the text is wider than the terminal screen, fallback to default display
 	if totalSpacesNeeded <= 0 {
@@ -80,9 +72,9 @@ func justifyLine(words []Word, terminalWidth int) []string {
 
 	// 4. Reconstruct the 8 rows by stitching our clean words and new spaces
 	justifiedLines := make([]string, 8)
-	for row := 0; row < 8; row++ {
+	for row := range 8 {
 		var sb strings.Builder
-		for i, w := range cleanWords {
+		for i, w := range actualWords {
 			wordLines := w.Lines()
 			sb.WriteString(wordLines[row])
 
@@ -119,10 +111,6 @@ func rightLine(line string, terminalWidth int) string {
 	return strings.Repeat(" ", spaces) + line
 }
 
-func leftLine(line string, terminalWidth int) string {
-	return line
-}
-
 func getTerminalWidth() int {
 	cmd := exec.Command("sh", "-c", "tput cols 2>/dev/tty")
 	cols, err := cmd.Output()
@@ -154,7 +142,7 @@ func Align(words []Word, alignment string) []string {
 		return result
 	case "justify":
 		return justifyLine(words, terminalWidth)
-	default: // "left" / "default"
+	default: // "left"
 		return Display(words)
 	}
 }

@@ -91,6 +91,7 @@ func main() {
 	if options.output != "" {
 		art.Output(outputRows, options.output)
 	} else {
-		fmt.Println(strings.Join(outputRows, "\n"))
+		fmt.Print(art.FinalOutput(outputRows, inputLines))
+		// fmt.Println(strings.Join(outputRows, "\n"))
 	}
 }

@@ -64,18 +64,18 @@ func main() {
 		return
 	}
 
-	// 1. Generate text models
-	inputLines := strings.Split(input, "\\n")
+	// render ASCII art
 	wordsMatrix := art.Draw(input, banner)
-
-	// 2. Modify text color models if flag matches
+	
+	// color the render
+	inputLines := strings.Split(input, "\\n")
 	if options.color != "" {
 		for i, line := range wordsMatrix {
 			wordsMatrix[i] = art.Color(line, inputLines[i], substr, options.color)
 		}
 	}
 
-	// 3. Flatten structure to printing matrix
+	// align the render
 	var outputRows []string
 	for _, line := range wordsMatrix {
 		var renderedLine []string
@@ -87,7 +87,7 @@ func main() {
 		outputRows = append(outputRows, renderedLine...)
 	}
 
-	// 4. Send output rows to target destination
+	// send outputRows to file specified
 	if options.output != "" {
 		art.Output(outputRows, options.output)
 	} else {

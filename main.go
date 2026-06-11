@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"acad.learn2earn.ng/git/foloruns/ascii-art-justify/art"
+	"acad.learn2earn.ng/git/foloruns/my-ascii-art-justify/art"
 )
 
 type Options struct {

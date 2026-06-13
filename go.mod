@@ -1,3 +1,3 @@
-module acad.learn2earn.ng/git/foloruns/my-ascii-art-justify
+module artscii
 
 go 1.25.0

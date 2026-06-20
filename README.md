@@ -30,8 +30,8 @@ The workspace is organized into a main runner, a flag verification checker, the 
 ├── valid.go              # Verification guardrails checking formatting flags
 ├── banners/              # Font template directory
 │   ├── standard.txt      # Reference template map files
-    ├── shadow.txt
-    └── thinkertoy.txt
+│   ├── shadow.txt
+│   └── thinkertoy.txt
 └── art/                  # Core ASCII Art Engineering Suite
     ├── align.go          # Layout mechanics (Tokenization & padding distribution)
     ├── color.go          # ANSI color embedding filters

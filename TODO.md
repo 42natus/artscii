@@ -8,3 +8,4 @@
 go run . --color=yellow --align=center "Centered Output" standard
 
 ```
+5. let art sent to external text files be sent without terminal formatting bleed.

@@ -34,12 +34,12 @@ The workspace is organized into a main runner, a flag verification checker, the 
     └── thinkertoy.txt
 └── art/                  # Core ASCII Art Engineering Suite
     ├── align.go          # Layout mechanics (Tokenization & padding distribution)
-    ├── color.go          # ANSI TrueColor rendering matrix filters
+    ├── color.go          # ANSI color embedding filters
     ├── display.go        # Horizontal component stitching engine
     ├── draw.go           # Text parser & font-map lookup logic
-    ├── output.go         # Outbound file system serialization pipelines
-    ├── template.go       # Font layout disk read operations
-    └── word.go           # Type definitions for letter/word matrices
+    ├── output.go         # Pipeline for outputting to external file
+    ├── template.go       # Font template generation operations
+    └── word.go           # Type and method definitions for Word matrix
 
 ```
 
@@ -84,11 +84,11 @@ go run . [OPTION] [STRING] [BANNER]
 
 ### Command Flags Reference
 
-| Flag | Argument Pattern | Operation |
+| Command Flag | Argument Pattern | Operation |
 | --- | --- | --- |
 | `--color` | `--color=<colorName> <substring>` | Colors a specific substring or the entire text block if no token match (`<substring>`) is provided. |
-| `--output` | `--output=<filename>.txt` | Diverts the rendered ASCII art output away from standard output (the terminal) directly to disk (in a `.txt` file. |
-| `--align` | `--align=<left|center|right|justify>` | Formats text positioning using active terminal width detection. |
+| `--output` | `--output=<filename>.txt` | Diverts the rendered ASCII art output away from standard output (the terminal) directly to disk (in a `.txt` file). |
+| `--align` | `--align=<left\|center\|right\|justify>` | Formats text positioning using active terminal width detection. |
 
 ---
 
@@ -160,7 +160,7 @@ To solve this, the engine runs a custom extraction pass before performing alignm
 
 ```text
 [ Raw Character Stream ]   ──>  [ Extract & Normalize ]  ──>  [ Clean Words ]
-  H-e-l-l-o- -W-o-r-l-d        (Strips structural spaces     [Hello]  [World]
+  H-e-l-l-o-[ ]-W-o-r-l-d        (Strips structural spaces     [Hello]  [World]
                                             & escape codes)            │
                                                                        ▼
 [ Terminal Output Canvas ] <──    [ Inject Padding ]     <──  [ Calculate Gaps ]
